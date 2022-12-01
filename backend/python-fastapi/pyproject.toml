@@ -1,0 +1,28 @@
+[tool.poetry]
+name = "twitter-clone"
+version = "0.0.1"
+description = "Twitter Clone backend made in python with fastapi framework"
+authors = ["henseljahja <henseljahja@gmail.com>"]
+readme = "README.md"
+packages = [{include = "twitter_clone"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+fastapi = "^0.88.0"
+SQLAlchemy = "^1.4.44"
+psycopg2-binary = "^2.9.5"
+uvicorn = {extras = ["standard"], version = "^0.20.0"}
+pyhumps = "^3.8.0"
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^22.10.0"
+mypy = "^0.991"
+isort = "^5.10.1"
+pre-commit = "^2.20.0"
+pycln = "^2.1.2"
+pytest = "^7.2.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
