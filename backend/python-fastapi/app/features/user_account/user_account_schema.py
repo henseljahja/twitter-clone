@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, List, Union
+from typing import List, Union
 
 from app.common.base.base_schema import BaseSchema
 
@@ -15,7 +15,7 @@ class UserAccountResponse(BaseSchema):
     location: str | None
     website: str | None
     joined_date: datetime | None
-    birthdate: datetime | None
+    birth_date: datetime | None
     is_verified: bool | None
     is_private: bool | None
     is_official_account: bool | None
@@ -23,6 +23,7 @@ class UserAccountResponse(BaseSchema):
     password: str | None
     phone_number: str | None
     country: str | None
+    profile_picture: str | None
     tweets: Union["List[TweetResponse]", None]
 
     class Config:

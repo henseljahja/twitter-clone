@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 
-from app.common.util import db_util
+from app.features.security.security_service import SecurityService
 from app.features.user_account.user_account_schema import (
     UserAccountResponse,
     UserAccountSignUpRequest,
@@ -10,6 +9,7 @@ from app.features.user_account.user_account_service import UserAccountService
 
 user_account_service = UserAccountService()
 user_account_controller = APIRouter()
+security_service = SecurityService()
 
 
 @user_account_controller.post(
@@ -18,12 +18,11 @@ user_account_controller = APIRouter()
     response_model_exclude_none=True,
 )
 def sign_up(
-    *,
-    session: Session = Depends(db_util.get_session),
-    user_account_sign_up_request: UserAccountSignUpRequest
+    *, user_account_sign_up_request: UserAccountSignUpRequest
 ) -> UserAccountResponse:
+
     return user_account_service.sign_up(
-        session=session, user_account_sign_up_request=user_account_sign_up_request
+        user_account_sign_up_request=user_account_sign_up_request
     )
 
 
@@ -32,8 +31,14 @@ def sign_up(
     response_model=UserAccountResponse,
     response_model_exclude_none=True,
 )
-def get_by_username(*, session: Session = Depends(db_util.get_session), username: str):
-    return user_account_service.get_by_username(session=session, username=username)
+async def get_by_username(
+    username: str,
+    user_account: UserAccountResponse = Depends(security_service.get_current_user),
+):
+    await user_account_service.check_privilege_by_username(
+        user_account=user_account, username=username
+    )
+    return await user_account_service.get_by_username(username=username)
 
 
 @user_account_controller.get(
@@ -41,11 +46,15 @@ def get_by_username(*, session: Session = Depends(db_util.get_session), username
     response_model=list[UserAccountResponse],
     response_model_exclude_none=True,
 )
-def get_list_of_followers_by_username(
-    *, session: Session = Depends(db_util.get_session), username: str
+async def get_list_of_followers_by_username(
+    username: str,
+    user_account: UserAccountResponse = Depends(security_service.get_current_user),
 ):
-    return user_account_service.get_list_of_followers_by_username(
-        session=session, username=username
+    await user_account_service.check_privilege_by_username(
+        user_account=user_account, username=username
+    )
+    return await user_account_service.get_list_of_followers_by_username(
+        username=username
     )
 
 
@@ -54,9 +63,13 @@ def get_list_of_followers_by_username(
     response_model=list[UserAccountResponse],
     response_model_exclude_none=True,
 )
-def get_list_of_following_by_username(
-    *, session: Session = Depends(db_util.get_session), username: str
+async def get_list_of_following_by_username(
+    username: str,
+    user_account: UserAccountResponse = Depends(security_service.get_current_user),
 ):
-    return user_account_service.get_list_of_following_by_username(
-        session=session, username=username
+    await user_account_service.check_privilege_by_username(
+        user_account=user_account, username=username
+    )
+    return await user_account_service.get_list_of_following_by_username(
+        username=username
     )

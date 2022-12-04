@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 from typing import TYPE_CHECKING, Union
 
@@ -19,3 +21,7 @@ class TweetResponse(BaseSchema):
 from app.features.user_account.user_account_schema import UserAccountResponse
 
 TweetResponse.update_forward_refs()
+
+
+class TweetRequest(BaseSchema):
+    text: str | None

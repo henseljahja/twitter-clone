@@ -1,35 +1,27 @@
+import asyncio
 import os
-from typing import Any, Generator
+from typing import Any
 
-from sqlalchemy import create_engine, text
-from sqlalchemy.orm import Session, declarative_base, sessionmaker
+from sqlalchemy.orm import Session
 
-from app.common.base.base_config import (
-    DATABASE_URL,
-    ENGINE,
+from app.common.base.base_config import (  # ENGINE,; BaseTableObject,; SessionMaker,
     INITIAL_DATA_DIR,
-    BaseTableObject,
-    SessionMaker,
 )
 from app.common.util.log_util import log
+from app.features.db.db_session import BaseTableObject, engine
 from app.features.tweet.tweet import Tweet
 from app.features.user_account.user_account import UserAccount
 
 tables = [UserAccount, Tweet]
 
 
-def create_database() -> None:
-    BaseTableObject.metadata.create_all(bind=ENGINE)
-    log.info("Database created")
-    with Session(ENGINE) as session:
-        try:
-            session.commit()
-        except Exception as e:
-            print(e)
-            session.rollback()
-            raise
-        finally:
-            session.close()
+async def create_database() -> None:
+    async def init_models():
+        async with engine.begin() as conn:
+            await conn.run_sync(BaseTableObject.metadata.drop_all)
+            await conn.run_sync(BaseTableObject.metadata.create_all)
+
+    asyncio.run(init_models())
 
 
 def execute_sql_scripts(filename: str, engine: Any) -> None:
@@ -65,7 +57,7 @@ def init_data() -> None:
         dummy_data_files = os.listdir(INITIAL_DATA_DIR)
         dummy_data_files.sort()
         for sql_file in dummy_data_files:
-            execute_sql_scripts(os.path.join(INITIAL_DATA_DIR, sql_file), ENGINE)
+            execute_sql_scripts(os.path.join(INITIAL_DATA_DIR, sql_file), engine)
         log.info("Dummy data loaded")
     except Exception as e:
         log.error(f"{__name__} | Failed to insert data into database: {e}")
@@ -73,14 +65,6 @@ def init_data() -> None:
 
 def drop_tables() -> None:
     try:
-        BaseTableObject.metadata.drop_all(bind=ENGINE)
+        BaseTableObject.metadata.drop_all(bind=engine)
     except Exception as e:
         log.error(f"{__name__} | Failed to drop tables : {e}")
-
-
-def get_session():
-    try:
-        db = SessionMaker()
-        yield db
-    finally:
-        db.close()

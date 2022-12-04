@@ -1,25 +1,34 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
+from typing import Any
 
-from app.common.util import db_util
-from app.features.tweet.tweet_schema import TweetResponse
+from fastapi import APIRouter, Depends
+from starlette import status
+
+from app.features.security.security_service import SecurityService
+from app.features.tweet.tweet_schema import TweetRequest, TweetResponse
 from app.features.tweet.tweet_service import TweetService
 from app.features.user_account.user_account_schema import UserAccountResponse
 from app.features.user_account.user_account_service import UserAccountService
 
 tweet_service = TweetService()
 tweet_controller = APIRouter()
+security_service = SecurityService()
+user_account_service = UserAccountService()
 
 
 @tweet_controller.get(
     "/username/{username}/tweet",
-    response_model=list[TweetResponse],
+    # response_model=list[TweetResponse],
     response_model_exclude_none=True,
 )
 def get_by_username(
-    *, session: Session = Depends(db_util.get_session), username: str
-) -> list[TweetResponse]:
-    return tweet_service.get_by_username(session=session, username=username)
+    username: str,
+    user_account: UserAccountResponse = Depends(security_service.get_current_user),
+    # session: Session = Depends(get_db),
+) -> Any:
+    user_account_service.check_privilege_by_username(
+        user_account=user_account, username=username
+    )
+    return tweet_service.get_tweets_by_username(username=username)
 
 
 @tweet_controller.get(
@@ -27,10 +36,14 @@ def get_by_username(
     response_model=list[TweetResponse],
     response_model_exclude_none=True,
 )
-def get_retweet_by_username(
-    *, session: Session = Depends(db_util.get_session), username: str
+async def get_retweet_by_username(
+    username: str,
+    user_account: UserAccountResponse = Depends(security_service.get_current_user),
 ) -> list[TweetResponse]:
-    return tweet_service.get_retweets_by_username(session=session, username=username)
+    await user_account_service.check_privilege_by_username(
+        user_account=user_account, username=username
+    )
+    return await tweet_service.get_retweets_by_username(username=username)
 
 
 @tweet_controller.get(
@@ -38,7 +51,40 @@ def get_retweet_by_username(
     response_model=list[TweetResponse],
     response_model_exclude_none=True,
 )
-def get_retweet_by_username(
-    *, session: Session = Depends(db_util.get_session), username: str
+async def get_retweet_by_username(
+    username: str,
+    user_account: UserAccountResponse = Depends(security_service.get_current_user),
 ) -> list[TweetResponse]:
-    return tweet_service.get_likes_by_username(session=session, username=username)
+    await user_account_service.check_privilege_by_username(
+        user_account=user_account, username=username
+    )
+
+    return await tweet_service.get_likes_by_username(username=username)
+
+
+@tweet_controller.post(
+    "/create",
+    # response_model=TweetResponse,
+    response_model_exclude_none=True,
+    status_code=status.HTTP_201_CREATED,
+)
+async def create_tweet(
+    tweet_request: TweetRequest,
+    user_account: UserAccountResponse = Depends(security_service.get_current_user),
+) -> Any:
+
+    return await tweet_service.create_tweet(
+        user_account=user_account, tweet_request=tweet_request
+    )
+
+
+@tweet_controller.delete(
+    "/delete/{tweet_id}", response_model=None, status_code=status.HTTP_204_NO_CONTENT
+)
+async def delete_tweet(
+    tweet_id: int,
+    user_account: UserAccountResponse = Depends(security_service.get_current_user),
+) -> None:
+    return await tweet_service.delete_tweet(
+        user_account=user_account, tweet_id=tweet_id
+    )

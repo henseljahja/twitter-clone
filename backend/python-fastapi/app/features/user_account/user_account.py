@@ -1,7 +1,7 @@
-from sqlalchemy import BigInteger, Boolean, Column, DateTime, Integer, String
+from sqlalchemy import Boolean, Column, DateTime, Integer, String
 from sqlalchemy.orm import relationship
 
-from app.common.base.base_config import BaseTableObject
+from app.features.db.db_session import BaseTableObject
 from app.features.retweet.retweet_association import Retweet
 from app.features.user_account.follower.follower_association import Follower
 
@@ -16,7 +16,7 @@ class UserAccount(BaseTableObject):
     location = Column(String)
     website = Column(String)
     joined_date = Column(DateTime)
-    birthdate = Column(DateTime)
+    birth_date = Column(DateTime)
     is_verified = Column(Boolean)
     is_private = Column(Boolean)
     is_official_account = Column(Boolean)
@@ -24,6 +24,7 @@ class UserAccount(BaseTableObject):
     password = Column(String)
     phone_number = Column(String)
     country = Column(String)
+    profile_picture = Column(String)
     tweet = relationship("Tweet", back_populates="user_account", lazy="noload")
     follower = relationship(
         "UserAccount",

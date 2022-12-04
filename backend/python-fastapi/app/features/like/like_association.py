@@ -1,6 +1,6 @@
 from sqlalchemy import Column, ForeignKey, Table
 
-from app.common.base.base_config import BaseTableObject
+from app.features.db.db_session import BaseTableObject
 
 Like = Table(
     "like",
