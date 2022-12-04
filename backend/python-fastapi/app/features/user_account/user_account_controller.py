@@ -31,14 +31,14 @@ def sign_up(
     response_model=UserAccountResponse,
     response_model_exclude_none=True,
 )
-async def get_by_username(
+def get_by_username(
     username: str,
     user_account: UserAccountResponse = Depends(security_service.get_current_user),
 ):
-    await user_account_service.check_privilege_by_username(
+    user_account_service.check_privilege_by_username(
         user_account=user_account, username=username
     )
-    return await user_account_service.get_by_username(username=username)
+    return user_account_service.get_by_username(username=username)
 
 
 @user_account_controller.get(
@@ -46,16 +46,14 @@ async def get_by_username(
     response_model=list[UserAccountResponse],
     response_model_exclude_none=True,
 )
-async def get_list_of_followers_by_username(
+def get_list_of_followers_by_username(
     username: str,
     user_account: UserAccountResponse = Depends(security_service.get_current_user),
 ):
-    await user_account_service.check_privilege_by_username(
+    user_account_service.check_privilege_by_username(
         user_account=user_account, username=username
     )
-    return await user_account_service.get_list_of_followers_by_username(
-        username=username
-    )
+    return user_account_service.get_list_of_followers_by_username(username=username)
 
 
 @user_account_controller.get(
@@ -63,13 +61,11 @@ async def get_list_of_followers_by_username(
     response_model=list[UserAccountResponse],
     response_model_exclude_none=True,
 )
-async def get_list_of_following_by_username(
+def get_list_of_following_by_username(
     username: str,
     user_account: UserAccountResponse = Depends(security_service.get_current_user),
 ):
-    await user_account_service.check_privilege_by_username(
+    user_account_service.check_privilege_by_username(
         user_account=user_account, username=username
     )
-    return await user_account_service.get_list_of_following_by_username(
-        username=username
-    )
+    return user_account_service.get_list_of_following_by_username(username=username)

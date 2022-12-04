@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
 from app.common.base.base_config import DB_CREATE, DB_DROP_TABLES, DB_DUMMY_DATA
-from app.common.util import db_util
+from app.features.db import db_util
 from app.features.security.security_controller import security_controller
 from app.features.tweet.tweet_controller import tweet_controller
 from app.features.user_account.user_account_controller import user_account_controller

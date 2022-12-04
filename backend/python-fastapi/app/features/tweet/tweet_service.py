@@ -3,7 +3,7 @@ from typing import Any
 from fastapi import HTTPException
 from starlette import status
 
-from app.common.util.log_util import log
+from app.common.base.log_config import log
 from app.features.tweet.tweet_repository import TweetRepository
 from app.features.tweet.tweet_schema import TweetRequest, TweetResponse
 from app.features.user_account.follower.follower_repository import FollowerRepository
@@ -23,22 +23,22 @@ class TweetService:
         tweets_response = [TweetResponse.from_orm(tweet) for tweet in tweets]
         return tweets_response
 
-    async def get_retweets_by_username(self, username: str) -> list[TweetResponse]:
-        tweets = await self.tweet_repository.get_retweets_by_username(username=username)
+    def get_retweets_by_username(self, username: str) -> list[TweetResponse]:
+        tweets = self.tweet_repository.get_retweets_by_username(username=username)
         tweets_response = [TweetResponse.from_orm(tweet) for tweet in tweets]
         return tweets_response
 
-    async def get_likes_by_username(self, username: str) -> list[TweetResponse]:
-        tweets = await self.tweet_repository.get_likes_by_username(username=username)
+    def get_likes_by_username(self, username: str) -> list[TweetResponse]:
+        tweets = self.tweet_repository.get_likes_by_username(username=username)
         tweets_response = [TweetResponse.from_orm(tweet) for tweet in tweets]
         return tweets_response
 
-    async def create_tweet(
+    def create_tweet(
         self,
         user_account: UserAccountResponse,
         tweet_request: TweetRequest,
     ):
-        tweet = await self.tweet_repository.create_tweet(
+        tweet = self.tweet_repository.create_tweet(
             user_account_id=user_account.user_account_id,
             text=tweet_request.text,
         )
@@ -46,12 +46,12 @@ class TweetService:
         tweet_response = TweetResponse.from_orm(tweet)
         return tweet_response
 
-    async def delete_tweet(
+    def delete_tweet(
         self,
         user_account: UserAccountResponse,
         tweet_id: int,
     ) -> None:
-        tweet = await self.tweet_repository.get_tweet_by_id(tweet_id=tweet_id)
+        tweet = self.tweet_repository.get_tweet_by_id(tweet_id=tweet_id)
         if not tweet:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="TWEET NOT FOUND"
@@ -60,5 +60,5 @@ class TweetService:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED, detail="UNAUTHORIZED USER"
             )
-        await self.tweet_repository.delete_tweet_by_id(tweet_id=tweet_id)
+        self.tweet_repository.delete_tweet_by_id(tweet_id=tweet_id)
         return None

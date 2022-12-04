@@ -18,11 +18,11 @@ security_service = SecurityService()
     response_model=LoginResponse,
     response_model_exclude_none=True,
 )
-async def login(
+def login(
     *,
     form_data: OAuth2PasswordRequestForm = Depends(),
 ):
-    user = await user_account_repository.get_by_username(username=form_data.username)
+    user = user_account_repository.get_by_username(username=form_data.username)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -47,7 +47,7 @@ async def login(
     response_model=UserAccountResponse,
     response_model_exclude_none=True,
 )
-async def get_me(
+def get_me(
     user_account: UserAccountResponse = Depends(security_service.get_current_user),
 ):
     return user_account

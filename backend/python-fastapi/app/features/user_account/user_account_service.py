@@ -3,7 +3,6 @@ from datetime import datetime
 from fastapi import HTTPException
 from starlette import status
 
-from app.features.db.transactional import Transactional
 from app.features.user_account.follower.follower_repository import FollowerRepository
 from app.features.user_account.user_account import UserAccount
 from app.features.user_account.user_account_repository import UserAccountRepository
@@ -18,15 +17,13 @@ class UserAccountService:
         self.user_account_repository = UserAccountRepository()
         self.follower_repository = FollowerRepository()
 
-    async def check_privilege_by_username(
+    def check_privilege_by_username(
         self, user_account: UserAccountResponse, username: str
     ) -> bool:
         if user_account.username == username:
             return True
-        if await self.user_account_repository.is_user_account_private(
-            username=username
-        ):
-            if not await self.user_account_repository.is_follower(
+        if self.user_account_repository.is_user_account_private(username=username):
+            if not self.user_account_repository.is_follower(
                 user_account=user_account, username=username
             ):
                 raise HTTPException(
@@ -35,8 +32,7 @@ class UserAccountService:
                 )
         return True
 
-    @Transactional()
-    async def sign_up(
+    def sign_up(
         self, user_account_sign_up_request: UserAccountSignUpRequest
     ) -> UserAccountResponse:
         user_account = UserAccount()
@@ -50,42 +46,34 @@ class UserAccountService:
         user_account_response = UserAccountResponse.from_orm(user_account)
         return user_account_response
 
-    async def get_by_username(self, username: str) -> UserAccountResponse:
-        user_account = await self.user_account_repository.get_by_username(
-            username=username
-        )
+    def get_by_username(self, username: str) -> UserAccountResponse:
+        user_account = self.user_account_repository.get_by_username(username=username)
         user_account_response = UserAccountResponse.from_orm(user_account)
         return user_account_response
 
-    async def get_list_of_followers_by_username(
+    def get_list_of_followers_by_username(
         self, username: str
     ) -> list[UserAccountResponse]:
-        user_accounts = (
-            await self.user_account_repository.get_list_of_followers_by_username(
-                username=username
-            )
-        )
-        return [UserAccountResponse.from_orm(x) for x in user_accounts]
-
-    async def get_list_of_following_by_username(
-        self, username: str
-    ) -> list[UserAccountResponse]:
-        user_accounts = (
-            await self.user_account_repository.get_list_of_following_by_username(
-                username=username
-            )
-        )
-        return [UserAccountResponse.from_orm(x) for x in user_accounts]
-
-    async def is_private(self, username: str) -> bool:
-        return await self.user_account_repository.is_user_account_private(
+        user_accounts = self.user_account_repository.get_list_of_followers_by_username(
             username=username
         )
+        return [UserAccountResponse.from_orm(x) for x in user_accounts]
 
-    async def is_follower(self, requester_username: str, target_username: str) -> bool:
-        requester_user_account = await self.get_by_username(username=requester_username)
-        target_user_account = await self.get_by_username(username=target_username)
-        return await self.follower_repository.is_follower(
+    def get_list_of_following_by_username(
+        self, username: str
+    ) -> list[UserAccountResponse]:
+        user_accounts = self.user_account_repository.get_list_of_following_by_username(
+            username=username
+        )
+        return [UserAccountResponse.from_orm(x) for x in user_accounts]
+
+    def is_private(self, username: str) -> bool:
+        return self.user_account_repository.is_user_account_private(username=username)
+
+    def is_follower(self, requester_username: str, target_username: str) -> bool:
+        requester_user_account = self.get_by_username(username=requester_username)
+        target_user_account = self.get_by_username(username=target_username)
+        return self.follower_repository.is_follower(
             requester_user_account_id=requester_user_account.user_account_id,
             target_user_account_id=target_user_account.user_account_id,
         )

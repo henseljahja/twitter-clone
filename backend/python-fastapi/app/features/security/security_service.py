@@ -78,9 +78,7 @@ class SecurityService:
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
-        user_account = await self.user_account_repository.get_by_email(
-            email=token_data.email
-        )
+        user_account = self.user_account_repository.get_by_email(email=token_data.email)
         if user_account is None:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,

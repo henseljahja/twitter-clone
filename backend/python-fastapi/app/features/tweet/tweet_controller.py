@@ -36,14 +36,14 @@ def get_by_username(
     response_model=list[TweetResponse],
     response_model_exclude_none=True,
 )
-async def get_retweet_by_username(
+def get_retweet_by_username(
     username: str,
     user_account: UserAccountResponse = Depends(security_service.get_current_user),
 ) -> list[TweetResponse]:
-    await user_account_service.check_privilege_by_username(
+    user_account_service.check_privilege_by_username(
         user_account=user_account, username=username
     )
-    return await tweet_service.get_retweets_by_username(username=username)
+    return tweet_service.get_retweets_by_username(username=username)
 
 
 @tweet_controller.get(
@@ -51,15 +51,15 @@ async def get_retweet_by_username(
     response_model=list[TweetResponse],
     response_model_exclude_none=True,
 )
-async def get_retweet_by_username(
+def get_retweet_by_username(
     username: str,
     user_account: UserAccountResponse = Depends(security_service.get_current_user),
 ) -> list[TweetResponse]:
-    await user_account_service.check_privilege_by_username(
+    user_account_service.check_privilege_by_username(
         user_account=user_account, username=username
     )
 
-    return await tweet_service.get_likes_by_username(username=username)
+    return tweet_service.get_likes_by_username(username=username)
 
 
 @tweet_controller.post(
@@ -68,12 +68,12 @@ async def get_retweet_by_username(
     response_model_exclude_none=True,
     status_code=status.HTTP_201_CREATED,
 )
-async def create_tweet(
+def create_tweet(
     tweet_request: TweetRequest,
     user_account: UserAccountResponse = Depends(security_service.get_current_user),
 ) -> Any:
 
-    return await tweet_service.create_tweet(
+    return tweet_service.create_tweet(
         user_account=user_account, tweet_request=tweet_request
     )
 
@@ -81,10 +81,8 @@ async def create_tweet(
 @tweet_controller.delete(
     "/delete/{tweet_id}", response_model=None, status_code=status.HTTP_204_NO_CONTENT
 )
-async def delete_tweet(
+def delete_tweet(
     tweet_id: int,
     user_account: UserAccountResponse = Depends(security_service.get_current_user),
 ) -> None:
-    return await tweet_service.delete_tweet(
-        user_account=user_account, tweet_id=tweet_id
-    )
+    return tweet_service.delete_tweet(user_account=user_account, tweet_id=tweet_id)

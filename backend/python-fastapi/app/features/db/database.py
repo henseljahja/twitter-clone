@@ -45,7 +45,7 @@ from starlette.responses import Response
 from starlette.types import ASGIApp
 from structlog.stdlib import BoundLogger
 
-from app.common.base.base_config import RESOURCES_DIR
+from app.common.base.base_config import DATABASE_URL, RESOURCES_DIR
 from app.features.db.json import json_dumps, json_loads
 
 logger = structlog.get_logger(__name__)
@@ -187,6 +187,7 @@ ENGINE_ARGUMENTS = {
     # "connect_args": {"options": "-c timezone=UTC"},
     "pool_pre_ping": True,
     # "pool_size": 60,
+    # "check_same_thread": False,
     "json_serializer": json_dumps,
     "json_deserializer": json_loads,
 }
@@ -213,7 +214,9 @@ class Database:
         self.request_context: ContextVar[str] = ContextVar(
             "request_context", default=""
         )
-        self.engine = create_engine(db_url, **ENGINE_ARGUMENTS)
+        self.engine = create_engine(
+            db_url, **ENGINE_ARGUMENTS, connect_args={"check_same_thread": False}
+        )
         self.session_factory = sessionmaker(bind=self.engine, **SESSION_ARGUMENTS)
 
         self.scoped_session = scoped_session(self.session_factory, self._scopefunc)
@@ -298,4 +301,5 @@ def transactional(db: Database, log: BoundLogger) -> Iterator:
         db.session.rollback()
 
 
-db = Database("sqlite:///" + RESOURCES_DIR + "\\twitter.db")
+db = Database(db_url="sqlite:///" + RESOURCES_DIR + "\\twitter.db")
+sync_engine = create_engine(DATABASE_URL)

@@ -1,4 +1,3 @@
-import asyncio
 import os
 from typing import Any
 
@@ -7,21 +6,22 @@ from sqlalchemy.orm import Session
 from app.common.base.base_config import (  # ENGINE,; BaseTableObject,; SessionMaker,
     INITIAL_DATA_DIR,
 )
-from app.common.util.log_util import log
-from app.features.db.db_session import BaseTableObject, engine
+from app.common.base.log_config import log
+from app.features.db.database import BaseModel, sync_engine
 from app.features.tweet.tweet import Tweet
 from app.features.user_account.user_account import UserAccount
 
 tables = [UserAccount, Tweet]
 
 
-async def create_database() -> None:
-    async def init_models():
-        async with engine.begin() as conn:
-            await conn.run_sync(BaseTableObject.metadata.drop_all)
-            await conn.run_sync(BaseTableObject.metadata.create_all)
-
-    asyncio.run(init_models())
+def create_database() -> None:
+    # def init_models():
+    #     with engine.begin() as conn:
+    #         await conn.run_sync(BaseTableObject.metadata.drop_all)
+    #         await conn.run_sync(BaseTableObject.metadata.create_all)
+    #
+    # asyncio.run(init_models())
+    BaseModel.metadata.create_all(bind=sync_engine)
 
 
 def execute_sql_scripts(filename: str, engine: Any) -> None:
@@ -31,7 +31,7 @@ def execute_sql_scripts(filename: str, engine: Any) -> None:
             escaped_sql = sql_file.read()
             escaped_sql = escaped_sql.split("\n")
             for i in escaped_sql:
-                with Session(engine) as session:
+                with Session(sync_engine) as session:
                     try:
                         session.execute(i)
                         session.commit()
@@ -57,7 +57,7 @@ def init_data() -> None:
         dummy_data_files = os.listdir(INITIAL_DATA_DIR)
         dummy_data_files.sort()
         for sql_file in dummy_data_files:
-            execute_sql_scripts(os.path.join(INITIAL_DATA_DIR, sql_file), engine)
+            execute_sql_scripts(os.path.join(INITIAL_DATA_DIR, sql_file), sync_engine)
         log.info("Dummy data loaded")
     except Exception as e:
         log.error(f"{__name__} | Failed to insert data into database: {e}")
@@ -65,6 +65,6 @@ def init_data() -> None:
 
 def drop_tables() -> None:
     try:
-        BaseTableObject.metadata.drop_all(bind=engine)
+        BaseModel.metadata.drop_all(bind=sync_engine)
     except Exception as e:
         log.error(f"{__name__} | Failed to drop tables : {e}")

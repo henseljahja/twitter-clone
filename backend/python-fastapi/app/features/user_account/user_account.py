@@ -1,12 +1,12 @@
 from sqlalchemy import Boolean, Column, DateTime, Integer, String
 from sqlalchemy.orm import relationship
 
-from app.features.db.db_session import BaseTableObject
+from app.features.db.database import BaseModel
 from app.features.retweet.retweet_association import Retweet
 from app.features.user_account.follower.follower_association import Follower
 
 
-class UserAccount(BaseTableObject):
+class UserAccount(BaseModel):
     __tablename__ = "user_account"
     user_account_id = Column(Integer, primary_key=True)
     name = Column(String)
