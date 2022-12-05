@@ -3,19 +3,20 @@ from datetime import datetime
 from fastapi import HTTPException
 from starlette import status
 
-from app.features.user_account.follower.follower_repository import FollowerRepository
+from app.features.tweet.tweet_repository import TweetRepository
 from app.features.user_account.user_account import UserAccount
 from app.features.user_account.user_account_repository import UserAccountRepository
 from app.features.user_account.user_account_schema import (
     UserAccountResponse,
     UserAccountSignUpRequest,
+    UserAccountStatisticsResponse,
 )
 
 
 class UserAccountService:
     def __init__(self):
         self.user_account_repository = UserAccountRepository()
-        self.follower_repository = FollowerRepository()
+        self.tweet_repository = TweetRepository()
 
     def check_privilege_by_username(
         self, user_account: UserAccountResponse, username: str
@@ -25,6 +26,27 @@ class UserAccountService:
         if self.user_account_repository.is_user_account_private(username=username):
             if not self.user_account_repository.is_follower(
                 user_account=user_account, username=username
+            ):
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="NOT A FOLLOWER. UNABLE TO VIEW",
+                )
+        return True
+
+    def check_privilege_by_tweet_id(
+        self, user_account: UserAccountResponse, tweet_id: int
+    ) -> bool:
+        tweet = self.tweet_repository.get_tweet_by_id(tweet_id=tweet_id)
+        user_account_by_tweet_id = (
+            self.user_account_repository.get_user_account_by_tweet_id(tweet_id=tweet_id)
+        )
+        if user_account.user_account_id == tweet.user_account_id:
+            return True
+        if self.user_account_repository.is_user_account_private(
+            username=user_account_by_tweet_id.username
+        ):
+            if not self.user_account_repository.is_follower(
+                user_account=user_account, username=user_account_by_tweet_id.username
             ):
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
@@ -46,9 +68,32 @@ class UserAccountService:
         user_account_response = UserAccountResponse.from_orm(user_account)
         return user_account_response
 
+    def get_statistics_by_user_account_id(
+        self, user_account_id: int
+    ) -> UserAccountStatisticsResponse:
+
+        following_count = (
+            self.user_account_repository.get_count_following_by_user_account_id(
+                user_account_id=user_account_id
+            )
+        )
+        follower_count = (
+            self.user_account_repository.get_count_follower_by_user_account_id(
+                user_account_id=user_account_id
+            )
+        )
+        return UserAccountStatisticsResponse(
+            follower_count=follower_count, following_count=following_count
+        )
+
     def get_by_username(self, username: str) -> UserAccountResponse:
         user_account = self.user_account_repository.get_by_username(username=username)
         user_account_response = UserAccountResponse.from_orm(user_account)
+        user_account_response.user_account_statistics = (
+            self.get_statistics_by_user_account_id(
+                user_account_id=user_account_response.user_account_id
+            )
+        )
         return user_account_response
 
     def get_list_of_followers_by_username(

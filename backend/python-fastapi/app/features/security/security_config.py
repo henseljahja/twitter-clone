@@ -1,7 +1,7 @@
 from app.common.base.base_config import base_config
 
 ACCESS_TOKEN_EXPIRE_MINUTES = base_config(
-    "ACCESS_TOKEN_EXPIRE_MINUTES", cast=int, default=30
+    "ACCESS_TOKEN_EXPIRE_MINUTES", cast=int, default=10080
 )
 REFRESH_TOKEN_EXPIRE_MINUTES = base_config(
     "REFRESH_TOKEN_EXPIRE_MINUTES", cast=int, default=10080

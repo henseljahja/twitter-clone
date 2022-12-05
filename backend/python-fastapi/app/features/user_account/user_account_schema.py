@@ -6,6 +6,11 @@ from typing import List, Union
 from app.common.base.base_schema import BaseSchema
 
 
+class UserAccountStatisticsResponse(BaseSchema):
+    follower_count: int | None
+    following_count: int | None
+
+
 class UserAccountResponse(BaseSchema):
     user_account_id: int | None
     name: str | None
@@ -24,6 +29,7 @@ class UserAccountResponse(BaseSchema):
     phone_number: str | None
     country: str | None
     profile_picture: str | None
+    user_account_statistics: UserAccountStatisticsResponse | None
     tweets: Union["List[TweetResponse]", None]
 
     class Config:

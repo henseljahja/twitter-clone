@@ -45,7 +45,8 @@ from starlette.responses import Response
 from starlette.types import ASGIApp
 from structlog.stdlib import BoundLogger
 
-from app.common.base.base_config import DATABASE_URL, RESOURCES_DIR
+from app.common.base.base_config import RESOURCES_DIR
+from app.features.db.db_config import DATABASE_URL
 from app.features.db.json import json_dumps, json_loads
 
 logger = structlog.get_logger(__name__)

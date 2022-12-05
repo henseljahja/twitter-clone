@@ -14,13 +14,3 @@ NUMBER_OF_WORKERS: int = base_config("NUMBER_OF_WORKERS", cast=int, default=9)
 # Development Config
 DEBUG: bool = base_config("DEBUG", cast=bool, default=True)
 RELOAD: bool = base_config("RELOAD", cast=bool, default=True)
-
-# Database settings
-DATABASE_URL: str = "sqlite:///" + RESOURCES_DIR + "\\twitter.db"
-
-INITIAL_DATA_DIR: str = os.path.join(RESOURCES_DIR, "sql")
-
-
-DB_DROP_TABLES: bool = base_config("DB_DROP_TABLES", cast=bool, default=False)
-DB_CREATE: bool = base_config("DB_CREATE", cast=bool, default=False)
-DB_DUMMY_DATA: bool = base_config("DB_DUMMY_DATA", cast=bool, default=False)

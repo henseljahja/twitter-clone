@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from app.common.base.base_config import DB_CREATE, DB_DROP_TABLES, DB_DUMMY_DATA
 from app.features.db import db_util
+from app.features.db.db_config import DB_CREATE, DB_DROP_TABLES, DB_DUMMY_DATA
 from app.features.security.security_controller import security_controller
 from app.features.tweet.tweet_controller import tweet_controller
 from app.features.user_account.user_account_controller import user_account_controller
@@ -16,9 +16,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(router=user_account_controller)
-app.include_router(router=tweet_controller)
-app.include_router(router=security_controller)
+app.include_router(
+    router=user_account_controller,
+    tags=["userAccount"],
+)
+app.include_router(
+    router=tweet_controller,
+    tags=["tweet"],
+)
+app.include_router(router=security_controller, tags=["security"])
 
 
 @app.on_event("startup")
