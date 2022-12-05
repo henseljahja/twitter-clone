@@ -1,0 +1,64 @@
+
+#trends-container {
+    width: 90%;
+    height: auto;
+    border-radius: 16px;
+    background: #f1f1f1c4;
+    margin-top: 20px;
+}
+
+#header-trends {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#trends-text {
+    font-weight: bold;
+    font-size: 20px;
+    margin: 11px;
+}
+
+#trends-left-box {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+
+    padding-left: 15px;
+}
+
+#trends-box {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    padding-top: 7px;
+    padding-bottom: 7px;
+}
+
+#trends-box:hover {
+    background: #e2e2e2c4;
+}
+
+#more-icon-trends {
+    font-size: 20px;
+    color: #444;
+}
+
+#more-icon-box {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    border-radius: 50%;
+}
+
+#more-icon-box:hover {
+    background: #cedee7;
+}
+
+#more-icon-box:hover #more-icon-trends {
+    color: #1a8bd6;
+}
